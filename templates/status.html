@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>診察状況</title>
+</head>
+
+<body>
+    <h1>診察状況</h1>
+    <ul>
+        {% for t in tickets %}
+        <li>{{ t.id }}番: {{ t.name }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/admin/next">次を呼ぶ（スタッフ用）</a>
+</body>
+
+</html>
