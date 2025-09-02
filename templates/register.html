@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>初回登録</title>
+</head>
+
+<body>
+    <h1>初回登録</h1>
+    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+    <form method="post">
+        <div>氏名*：<input name="name" value="{{ form.name if form else '' }}" required></div>
+        <div>フリガナ：<input name="kana" value="{{ form.kana if form else '' }}"></div>
+        <div>ペット名*：<input name="pet_name" value="{{ form.pet_name if form else '' }}" required></div>
+        <div>電話番号*：<input name="phone" value="{{ form.phone if form else '' }}" required></div>
+        <div>生年月日*：<input type="date" name="birth" value="{{ form.birth if form else '' }}" required></div>
+        <div>メール（任意）：<input type="email" name="email" value="{{ form.email if form else '' }}"></div>
+        <button>登録して順番を取る</button>
+    </form>
+    <p><a href="/">戻る</a></p>
+</body>
+
+</html>

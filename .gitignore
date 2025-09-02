@@ -1,1 +1,5 @@
-.venv
+.env
+.qtime.sqlite
+qtime.sqlite
+.venv/
+__pycache__/
