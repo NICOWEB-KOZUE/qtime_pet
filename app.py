@@ -1,8 +1,9 @@
 import os
-import datetime, time
+import time
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from models import db, Ticket, Patient
+from utils import find_or_create_today_ticket_for_patient, today_jst
 
 # 起動時にDBを用意
 if db.is_closed():
@@ -72,7 +73,7 @@ def register_post():
     )
 
     # 受付（番号発行）＝ Ticket作成
-    t = Ticket.create(patient=p, name=p.name)
+    t, created = find_or_create_today_ticket_for_patient(p)
     return redirect(url_for("done", ticket_id=t.id))
 
 
@@ -91,7 +92,7 @@ def login_post():
         return render_template("login.html", error="診察券番号またはパスワードが違います", form=request.form)
 
     # 受付（番号発行）
-    t = Ticket.create(patient=p, name=p.name)
+    t, created = find_or_create_today_ticket_for_patient(p)
     return redirect(url_for("done", ticket_id=t.id))
 
 
@@ -117,6 +118,16 @@ def admin_next():
         ticket.done = True
         ticket.save()
     return redirect(url_for("status"))
+
+# 診察状況
+@app.route("/status.json")
+def status_json():
+    tickets = (
+        Ticket.select()
+        .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
+        .order_by(Ticket.created_at)
+    )
+    return jsonify([{"id": t.id, "name": t.name, "created_at": t.created_at.isoformat()} for t in tickets])
 
 
 if __name__ == "__main__":

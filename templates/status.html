@@ -14,6 +14,24 @@
         {% endfor %}
     </ul>
     <a href="/admin/next">次を呼ぶ（スタッフ用）</a>
+
+    <ul id="queue"></ul>
+    <script>
+        async function refresh() {
+            const r = await fetch('/status.json', { cache: 'no-store' });
+            const data = await r.json();
+            const ul = document.getElementById('queue');
+            if (!ul) return;
+            ul.innerHTML = '';
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.name;
+                ul.appendChild(li);
+            });
+        }
+        setInterval(refresh, 5000);
+        refresh();
+    </script>
 </body>
 
 </html>
