@@ -8,8 +8,8 @@ from peewee import (
     IntegerField,
     ForeignKeyField,
     DateTimeField,
-    BooleanField,  # ← 追加！
-    SqliteDatabase,
+    BooleanField,
+    DateField,
 )
 
 load_dotenv()  # .env を読み込む
@@ -42,6 +42,9 @@ class Ticket(Model):
     name = CharField()                        # 表示用（紙受付や簡単表示で使う）
     created_at = DateTimeField(default=datetime.datetime.now)
     done = BooleanField(default=False)
+
+    visit_date = DateField(null=True)  # 当日の運用を明確化
+    notified = BooleanField(default=False)  # 通知済フラグ
 
     class Meta:
         database = db
