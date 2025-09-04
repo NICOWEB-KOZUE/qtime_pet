@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QTime PET</title>
+</head>
+
+<body>
+    <style>
+        body {
+            font-size: 32px;
+        }
+    
+        .big {
+            font-size: 80px;
+            font-weight: bold;
+        }
+    </style>
+    <h1>ただいまの診察番号</h1>
+    <div class="big">{{ now_serving.id if now_serving else "-" }}</div>
+    
+    <h2>つぎの方</h2>
+    <ul id="q">
+        {% for t in queue %}<li>#{{t.id}}</li>{% endfor %}
+    </ul>
+    
+    <script>
+        async function refresh() {
+            const r = await fetch('/status.json', { cache: 'no-store' });
+            const data = await r.json();
+            const ul = document.getElementById('q');
+            ul.innerHTML = '';
+            data.slice(0, 6).forEach(x => {
+                const li = document.createElement('li');
+                li.textContent = `#${x.id}`;
+                ul.appendChild(li);
+            });
+        }
+        setInterval(refresh, 5000); refresh();
+    </script>
+</body>
+
+</html>

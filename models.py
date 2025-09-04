@@ -1,7 +1,6 @@
-import os
+import os, datetime
 from dotenv import load_dotenv
 from playhouse.db_url import connect
-import datetime
 from peewee import (
     Model,
     CharField,

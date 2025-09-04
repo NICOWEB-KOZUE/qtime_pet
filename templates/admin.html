@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QTime PET</title>
+</head>
+
+<body>
+    <h2>未処理</h2>
+    <form method="post" action="{{ url_for('admin_next') }}"><button>次を呼ぶ</button></form>
+    <ul>
+        {% for t in pending %}
+        <li>#{{t.id}} {{t.name}}</li>
+        {% else %}
+        <li>なし</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>直近処理済み</h2>
+    <ul>
+        {% for t in done_recent %}
+        <li>#{{t.id}} {{t.name}}</li>
+        {% else %}
+        <li>なし</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>紙受付（手入力）</h2>
+    <form method="post" action="{{ url_for('admin_manual_add') }}">
+        <input name="name" placeholder="お名前">
+        <button>追加</button>
+    </form>
+</body>
+
+</html>
