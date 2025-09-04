@@ -4,18 +4,24 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from models import db, Ticket, Patient
 from utils import find_or_create_today_ticket_for_patient, today_jst
-from notify import send_email, NOTIFY_ENABLED
 
-# 起動時にDBを用意
-if db.is_closed():
-    db.connect()
-db.create_tables([Patient, Ticket], safe=True)
+from notifier import send_email
+from notify import NOTIFY_ENABLED
 
 # .env を読み込む
 load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-unsafe-key")
+
+# 環境変数で ON/OFF（"1" で有効）
+NOTIFY_ENABLED = os.getenv("NOTIFY_ENABLED") == "1"
+
+
+# 起動時にDBを用意
+if db.is_closed():
+    db.connect()
+db.create_tables([Patient, Ticket], safe=True)
 
 # ---- ユーティリティ ----
 def issue_card_number() -> str:
@@ -170,6 +176,8 @@ def admin_next():
     if t:
         t.done = True
         t.save()
+
+        notify_if_two_ahead()
     return redirect(url_for("admin_dashboard"))
 
 
@@ -197,36 +205,54 @@ def admin_manual_add():
 
 @app.route("/display")
 def display():
-    now_serving = (
-        Ticket.select()
-        .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
-        .order_by(Ticket.created_at.desc())
-        .first()
-    )
-    queue = (
-        Ticket.select()
-        .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
-        .order_by(Ticket.created_at)
-        .limit(6)
-    )
+    now_serving = (Ticket.select()
+                   .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
+                   .order_by(Ticket.created_at.desc())
+                   .first())
+    queue = (Ticket.select()
+             .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
+             .order_by(Ticket.created_at)
+             .limit(6))
     return render_template("display.html", now_serving=now_serving, queue=queue)
 
-
+# 「あと2人で通知」
 def notify_if_two_ahead():
+    print(f"[NOTIFY CHECK] NOTIFY_ENABLED={NOTIFY_ENABLED}")
     if not NOTIFY_ENABLED:
+        print("[NOTIFY SKIP] 通知が無効です")
         return
+
     queue = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
         .order_by(Ticket.created_at)
     )
-    target = queue.offset(1).first()  # 先頭の“次の次”＝あと2人
-    if not target or target.notified:
+
+    print(f"[NOTIFY CHECK] 待ち人数: {queue.count()}")
+    # 0=診察直前, 1=あと1人, 2=あと2人
+    target = queue.offset(2).first()  # 先頭の“次の次”＝あと2人
+    if not target:
+        print("[NOTIFY SKIP] あと2人目の患者がいません")
         return
-    if target.patient and target.patient.email:
-        send_email(target.patient.email, "まもなく診察です", "あと2人でご案内です。待合室にお越しください。")
+    if target.notified:
+        print(f"[NOTIFY SKIP] 既に通知済み ticket_id={target.id}")
+        return
+
+    # 患者が紐づかない（手入力） or メールなし はスキップ
+    patient = getattr(target, "patient", None)
+    email = getattr(patient, "email", None) if patient else None
+    if not email:
+        print(f"[EMAIL SKIP] no email for ticket_id={target.id}")
+        return
+
+    try:
+        send_email(email, "まもなく診察になります", "待合室でお待ちください")
+        print(f"[EMAIL SENT] to={email} ticket_id={target.id}")
         target.notified = True
         target.save()
+    except Exception as e:
+        # 送れなかったらフラグは立てない（次回リトライできるように）
+        print(f"[EMAIL ERROR] to={email} err={e}")
 
 
 if __name__ == "__main__":
