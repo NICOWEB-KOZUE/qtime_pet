@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from models import db, Ticket, Patient
 from utils import find_or_create_today_ticket_for_patient, today_jst
+from email.utils import parseaddr
 
 from notifier import send_email
 from notify import NOTIFY_ENABLED
@@ -37,6 +38,16 @@ def last4_from_birth(birth: str) -> str:
     except Exception:
         return ""
 
+
+def looks_like_email(value: str) -> bool:
+    """最低限の形式チェック"""
+    _, addr = parseaddr(value or "")
+    if "@" not in addr:
+        return False
+    local, _, domain = addr.rpartition("@")
+    return bool(local) and "." in domain
+
+
 # ---- 画面ルート ----
 @app.route("/")
 def index():
@@ -57,6 +68,10 @@ def register_post():
     phone = request.form.get("phone", "").strip()
     birth = request.form.get("birth", "").strip()  # YYYY-MM-DD
     email = request.form.get("email", "").strip() or None
+
+    # email は任意項目：空ならバリデーション不要
+    if email and not looks_like_email(email):
+        return render_template("register.html", error="メールアドレスの形式が正しくありません", form=request.form)
 
     if not (name and pet_name and phone and birth):
         return render_template("register.html", error="必須項目を入力してください", form=request.form)
@@ -137,6 +152,13 @@ def admin_login():
             return redirect(url_for("admin_dashboard"))
         flash("PINが違います")
     return render_template("admin_login.html")
+
+
+@app.route("/admin/logout", methods=["POST"])
+def admin_logout():
+    session.pop("admin", None)
+    flash("ログアウトしました")
+    return redirect(url_for("admin_login"))
 
 
 # 管理保護（/admin配下を守る）
