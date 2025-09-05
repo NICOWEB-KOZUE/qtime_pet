@@ -135,12 +135,27 @@ def status():
 # 診察状況
 @app.route("/status.json")
 def status_json():
-    tickets = (
+    # 今日の未処理（待ち行列）
+    queue = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
         .order_by(Ticket.created_at)
     )
-    return jsonify([{"id": t.id, "name": t.name, "created_at": t.created_at.isoformat()} for t in tickets])
+
+    # 今日の直近処理済み＝「ただいまの診察番号」（なければ None）
+    now_serving = (
+        Ticket.select()
+        .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
+        .order_by(Ticket.created_at.desc())
+        .first()
+    )
+
+    return jsonify(
+        {
+            "now_serving": {"id": now_serving.id} if now_serving else None,
+            "queue": [{"id": t.id} for t in queue]
+        }
+    )
 
 
 # --- 管理ログイン ---
