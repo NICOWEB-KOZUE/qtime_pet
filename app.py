@@ -139,6 +139,13 @@ def admin_login():
     return render_template("admin_login.html")
 
 
+@app.route("/admin/logout", methods=["POST"])
+def admin_logout():
+    session.pop("admin", None)
+    flash("ログアウトしました")
+    return redirect(url_for("admin_login"))
+
+
 # 管理保護（/admin配下を守る）
 @app.before_request
 def _protect_admin():
