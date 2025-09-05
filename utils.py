@@ -8,6 +8,11 @@ def today_jst() -> date:
     return datetime.now(JST).date()
 
 
+def current_session():
+    h = datetime.now(JST).hour
+    return "AM" if h < 12 else "PM"
+
+
 def find_or_create_today_ticket_for_patient(patient):
     """同日・未完了があればそれを返し、なければ新規作成"""
     existing = (
@@ -17,5 +22,5 @@ def find_or_create_today_ticket_for_patient(patient):
     )
     if existing:
         return existing, False
-    t = Ticket.create(patient=patient, name=patient.name, visit_date=today_jst())
+    t = Ticket.create(patient=patient, name=patient.name, visit_date=today_jst(), session=current_session())
     return t, True
