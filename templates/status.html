@@ -112,6 +112,35 @@
             border-top: 1px solid var(--border);
             backdrop-filter: blur(2px);
         }
+
+         .back-wrap{
+        /* 中央寄せ */
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+        /* ボタンの周囲に“空白”をつくって中央に見せる */
+            min-height:120px;         /* ここで縦方向の余白を確保 */
+            margin:24px 0 84px;       /* 下は固定バー(tsbar)に被らないよう多め */
+        }
+
+        .back-btn{
+            display:inline-block;
+            padding:12px 16px;
+            border:1px solid var(--border, #e5e7eb);
+            border-radius:12px;
+            background:#fff;
+            color:var(--blue-2, #2563eb);
+            font-size:16px;
+            font-weight:700;
+            cursor:pointer;
+            text-decoration:none;
+            box-shadow:0 2px 6px rgba(0,0,0,.05);
+            transition: transform .02s ease, box-shadow .2s ease, background-color .2s ease;
+        }
+        .back-btn:hover{ box-shadow:0 4px 10px rgba(0,0,0,.08); }
+        .back-btn:active{ transform: translateY(1px); }
+
     </style>
 </head>
 
@@ -127,6 +156,11 @@
 
         <h2>つぎの方</h2>
         <ul id="q" class="num-grid"></ul>
+
+        <div class="back-wrap">
+            <button class="back-btn" type="button" onclick="history.back()">← 前の画面に戻る</button>
+            <noscript><a class="back-btn" href="{{ url_for('index') }}">← 受付トップに戻る</a></noscript>
+        </div>
     </main>
 
     <div id="tsbar">最終更新 -</div>
