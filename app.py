@@ -6,6 +6,7 @@ from models import db, Ticket, Patient
 from utils import find_or_create_today_ticket_for_patient, today_jst
 from utils import _next_seq_no_for_day
 from email.utils import parseaddr
+from emails import compose_two_ahead_email
 
 from notifier import send_email
 from notify import NOTIFY_ENABLED
@@ -290,8 +291,9 @@ def notify_if_two_ahead():
         print(f"[EMAIL SKIP] no email for ticket_id={target.id}")
         return
 
+    subject, body = compose_two_ahead_email(target)
     try:
-        send_email(email, "まもなく診察になります", "待合室でお待ちください")
+        send_email(email, subject, body)
         print(f"[EMAIL SENT] to={email} ticket_id={target.id}")
         target.notified = True
         target.save()
