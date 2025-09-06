@@ -1,9 +1,9 @@
 import os
 import time
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash, g
 from models import db, Ticket, Patient
-from utils import find_or_create_today_ticket_for_patient, today_jst
+from utils import find_or_create_today_ticket_for_patient, today_jst, current_session, is_closed
 from utils import _next_seq_no_for_day
 from email.utils import parseaddr
 from emails import compose_two_ahead_email
@@ -50,6 +50,23 @@ def looks_like_email(value: str) -> bool:
     return bool(local) and "." in domain
 
 
+# 休診情報
+@app.context_processor
+def inject_clinic_flags():
+    vdate = today_jst()
+    sess = current_session()
+    closed, reason = is_closed(vdate, sess)
+    # テンプレから  CLINIC_TODAY.is_closed / .closed_reason / .session を参照できる
+    return {
+        "CLINIC_TODAY": {
+            "date": vdate,
+            "session": sess,
+            "is_closed": closed,
+            "closed_reason": reason,
+        }
+    }
+
+
 # ---- 画面ルート ----
 @app.route("/")
 def index():
@@ -64,6 +81,11 @@ def register_get():
 
 @app.route("/register", methods=["POST"])
 def register_post():
+    # 休診なら受付させない
+    closed, reason = is_closed(today_jst(), current_session())
+    if closed:
+        flash(reason or "現在は受付時間外です")
+        return redirect(url_for("index"))
     name = request.form.get("name", "").strip()
     kana = request.form.get("kana", "").strip() or None
     pet_name = request.form.get("pet_name", "").strip()
@@ -109,6 +131,11 @@ def login_get():
 
 @app.route("/login", methods=["POST"])
 def login_post():
+    # 休診なら受付させない
+    closed, reason = is_closed(today_jst(), current_session())
+    if closed:
+        flash(reason or "現在は受付時間外です")
+        return redirect(url_for("index"))
     card = request.form.get("card", "").strip()
     pwd = request.form.get("pwd", "").strip()
     p = Patient.get_or_none(Patient.card_number == card, Patient.password == pwd)
