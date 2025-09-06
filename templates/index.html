@@ -2,15 +2,314 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <title>QTime PET</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&display=swap" rel="stylesheet">
+    <title>平泉どうぶつ病院 | 受付</title>
+
+    <style>
+        :root {
+            --bg: #f7f9fb;
+            --card: #ffffff;
+            --accent: #2b7de9;
+            --accent-weak: #e6f0fe;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --ok: #15803d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card);
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .brand{
+            display:flex; align-items:center; gap:12px;
+            font-weight:700;
+            font-size:20px;
+            letter-spacing:.05em;
+            /* 丸ゴ優先 → mac のヒラギノ丸ゴ → Windows 系 → 最後に一般ゴシック */
+            font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN",
+                         "Yu Gothic UI", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+}
+
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; }
+        .logo-img {
+            height: 36px;
+            width: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .hero {
+            margin: 24px 0 10px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 880px) {
+            .grid {
+                grid-template-columns: 1.1fr 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(16, 24, 40, .04);
+        }
+
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card .sub {
+            color: var(--muted);
+            font-size: 20px;
+            margin-top: 4px;
+        }
+
+        .btns {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            appearance: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-weight: 700;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform .02s ease, box-shadow .2s ease, background-color .2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-ghost {
+            background: var(--accent-weak);
+            color: var(--accent);
+        }
+
+        .status {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .pill {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .num {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        #now{
+            color:#ef4444; 
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .queue {
+            margin-top: 8px;
+            padding-left: 18px;
+        }
+
+        .queue li {
+            margin: 2px 0;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .refresh {
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .ts {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .links {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .link {
+            font-size: 14px;
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>順番受付</h1>
-    <p><a href="/register">初回登録（順番を取る）</a></p>
-    <p><a href="/login">再診ログイン（順番を取る）</a></p>
-    <p><a href="/status">診察状況の確認</a></p>
+    <header>
+        <div class="wrap">
+            <div class="brand">
+                <img class="logo-img" src="{{ url_for('static', filename='img/qtime_pet.png') }}" alt="平泉どうぶつ病院 ロゴ" />
+                <div>平泉どうぶつ病院</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <section class="hero">
+            <h1>本日の受付</h1>
+            <p>当日の順番受付と進行状況を確認できます。</p>
+        </section>
+
+        <section class="grid">
+            <!-- 受付カード -->
+            <div class="card">
+                <h2>受付する</h2>
+                <div class="sub">初めての方は「初回登録」、<br>再診の方は「再診ログイン」へ</div>
+                <div class="btns">
+                    <a class="btn btn-primary" href="{{ url_for('register_get') }}">📝 初回登録（はじめての方）</a>
+                    <a class="btn btn-ghost" href="{{ url_for('login_get') }}">🔑 再診ログイン（診察券あり）</a>
+            </div>
+
+            <!-- 状況カード -->
+            <div class="card" id="status-card">
+                <h2>本日の診察状況</h2>
+                <div class="status">
+                    <div class="pill">
+                        <div class="sub">ただいまの番号</div>
+                        <div class="num" id="now">-</div>
+                    </div>
+                    <div class="pill">
+                        <div class="sub">次の方</div>
+                        <div class="num" id="next">-</div>
+                    </div>
+                </div>
+
+                <ul class="queue" id="queue"></ul>
+
+                <div class="toolbar">
+                    <button class="refresh" id="refreshBtn">最新の情報に更新</button>
+                    <div class="ts" id="ts">最終更新 -</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        async function loadStatus() {
+            try {
+                const r = await fetch("/status.json", { cache: "no-store" });
+                const data = await r.json();
+
+                // ただいまの番号（seq_no があれば優先、無ければ id）
+                const nowNo = data.now_serving ? (data.now_serving.seq_no ?? data.now_serving.id) : "-";
+                document.getElementById("now").textContent = nowNo;
+
+                // 次の方（待ち行列の先頭）
+                const nextInQueue = (data.queue || [])[0];
+                document.getElementById("next").textContent = nextInQueue ? (nextInQueue.seq_no ?? nextInQueue.id) : "-";
+
+                // 以降の数名をリスト表示
+                const ul = document.getElementById("queue");
+                ul.innerHTML = "";
+                (data.queue || []).slice(0, 6).forEach((x, i) => {
+                    const li = document.createElement("li");
+                    const n = x.seq_no ?? x.id;
+                    li.textContent = (i === 0) ? `#${n}（次）` : `#${n}`;
+                    ul.appendChild(li);
+                });
+
+                document.getElementById("ts").textContent = "最終更新 " + new Date().toLocaleTimeString();
+            } catch (e) {
+                console.error("status refresh failed", e);
+                document.getElementById("ts").textContent = "通信エラー " + new Date().toLocaleTimeString();
+            }
+        }
+
+        document.getElementById("refreshBtn").addEventListener("click", loadStatus);
+        // 5秒ごとに自動更新
+        setInterval(loadStatus, 5000);
+        // 初回読み込み
+        loadStatus();
+    </script>
 </body>
 
 </html>

@@ -2,43 +2,351 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <title>QTime PET</title>
+    <meta charset="UTF-8" />
+    <title>QTime PET 管理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --bg: #f7f9fb;
+            --card: #fff;
+            --border: #e5e7eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --accent: #2563eb;
+            --danger: #b91c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px 20px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .brand {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: .02em;
+        }
+
+        .brand .tools {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn {
+            appearance: none;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: #fff;
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .btn-ghost {
+            background: #eef2ff;
+            color: #1d4ed8;
+            border-color: #c7d2fe;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(16, 24, 40, .04);
+        }
+
+        .card h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* 次の呼び出し（大きめ表示） */
+        .next-box {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .big-no {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #0d47a1;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: clamp(48px, 8vw, 96px);
+            padding: 16px 10px;
+            min-height: 120px;
+        }
+
+        /* リスト */
+        .list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .item+.item {
+            margin-top: 8px;
+        }
+
+        .badge {
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #1d4ed8;
+            border: 1px solid #c7d2fe;
+        }
+
+        .name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 36ch;
+        }
+
+        .dim {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width:700px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-inline {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            min-width: 220px;
+        }
+
+        .footer-tools {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .links {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        a.link {
+            color: #1d4ed8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
 </head>
 
+<body>
+    <header>
+        <div class="wrap brand">
+            <h1>QTime PET 管理</h1>
+            <div class="tools">
+                <div class="links">
+                    <a class="link" href="{{ url_for('status') }}" target="_blank">診察状況（患者向け）</a>
+                    <a class="link" href="{{ url_for('display') }}" target="_blank">院内ディスプレイ</a>
+                </div>
+                <form method="post" action="{{ url_for('admin_logout') }}">
+                    <button type="submit" class="btn">ログアウト</button>
+                </form>
+            </div>
+        </div>
+    </header>
 
-    <body>
-        <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <h1 style="margin:0;font-size:18px;">QTime PET 管理</h1>
-            <form method="post" action="{{ url_for('admin_logout') }}">
-                <button type="submit">ログアウト</button>
-            </form>
-        </header>
+    <main class="wrap">
+        <div class="row">
+            <!-- 左：オペレーション -->
+            <section class="card">
+                <h2>呼び出し操作</h2>
+                {% set next = (pending|first) %}
+                <div class="next-box">
+                    <div>
+                        <div class="sub">次に呼び出す番号</div>
+                        <div class="big-no">{{ next.seq_no or next.id if next else '-' }}</div>
+                        <div class="sub" style="margin-top:6px;">
+                            {{ next.name if next else '待ち患者なし' }}
+                        </div>
+                    </div>
+                    <div style="display:grid; gap:8px;">
+                        <form method="post" action="{{ url_for('admin_next') }}">
+                            <button class="btn btn-primary" style="width:180px;">次を呼ぶ</button>
+                        </form>
+                        <form method="post" action="{{ url_for('admin_undo') }}">
+                            <button class="btn btn-danger" style="width:180px;">戻す（直近）</button>
+                        </form>
+                        <button class="btn btn-ghost" style="width:180px;" onclick="location.reload()">更新</button>
+                    </div>
+                </div>
 
-        <h2>未処理</h2>
-        <form method="post" action="{{ url_for('admin_next') }}"><button>次を呼ぶ</button></form>
-        <ul>
-            {% for t in pending %}
-                <li>No.{{ t.seq_no }} {{ t.name }}</li>
-            {% else %}
-                <li>なし</li>
-            {% endfor %}
-        </ul>
-    
-        <h2>直近処理済み</h2>
-        <ul>
-            {% for t in done_recent %}
-                <li>No.{{ t.seq_no }} {{ t.name }}</li>
-            {% else %}
-                <li>なし</li>
-            {% endfor %}
-        </ul>
-    
-        <h2>紙受付（手入力）</h2>
-            <form method="post" action="{{ url_for('admin_manual_add') }}">
-            <input name="name" placeholder="お名前">
-            <button>追加</button>
-        </form>
-    </body>
+                <hr style="border:none;border-top:1px solid var(--border); margin:16px 0;" />
+
+                <div class="grid-2">
+                    <div>
+                        <h2 style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>未処理（待ち {{ pending|length }}）</span>
+                        </h2>
+                        <ul class="list" style="max-height: 48vh; overflow:auto;">
+                            {% for t in pending %}
+                            <li class="item">
+                                <div>
+                                    <span class="badge">No.{{ t.seq_no or t.id }}</span>
+                                    <span class="name">{{ t.name }}</span>
+                                </div>
+                                <span class="dim">{{ t.created_at.strftime('%H:%M') if t.created_at else '' }}</span>
+                            </li>
+                            {% else %}
+                            <li class="item"><span class="dim">なし</span></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h2>直近処理済み</h2>
+                        <ul class="list">
+                            {% for t in done_recent %}
+                            <li class="item">
+                                <div>
+                                    <span class="badge">No.{{ t.seq_no or t.id }}</span>
+                                    <span class="name">{{ t.name }}</span>
+                                </div>
+                                <span class="dim">{{ t.created_at.strftime('%H:%M') if t.created_at else '' }}</span>
+                            </li>
+                            {% else %}
+                            <li class="item"><span class="dim">なし</span></li>
+                            {% endfor %}
+                        </ul>
+
+                        <div class="card" style="margin-top:12px;">
+                            <h2>紙受付（手入力）</h2>
+                            <form class="form-inline" method="post" action="{{ url_for('admin_manual_add') }}">
+                                <input name="name" placeholder="お名前" autocomplete="off" />
+                                <button class="btn btn-primary">追加</button>
+                            </form>
+                            <p class="sub" style="margin:6px 0 0;">※ 手入力はメール通知の対象外です</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-tools">
+                    <button class="btn" onclick="location.reload()">このページを更新</button>
+                </div>
+            </section>
+
+            <!-- 右：メモ/ヘルプ（任意） -->
+            <aside class="card">
+                <h2>運用メモ</h2>
+                <ul class="list">
+                    <li class="item"><span class="name">「次を呼ぶ」で先頭の患者が診察済みに移動します。</span></li>
+                    <li class="item"><span class="name">誤操作時は「戻す（直近）」で直前の1件を未処理に戻せます。</span></li>
+                    <li class="item"><span class="name">紙受付はお名前のみの簡易追加（通知なし）です。</span></li>
+                </ul>
+                <p class="sub" style="margin-top:8px;">
+                    ※ 番号は当日連番（seq_no）を使用しています。<br />
+                    ※ 表示が乱れた場合は「このページを更新」を押してください。
+                </p>
+            </aside>
+        </div>
+    </main>
+</body>
 
 </html>

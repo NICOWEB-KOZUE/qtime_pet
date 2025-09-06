@@ -2,81 +2,218 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <title>QTime PET</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QTime PET | 院内表示</title>
     <style>
+        :root {
+            --bg: #fff;
+            /* 背景は白 */
+            --text: #1f2937;
+            --muted: #6b7280;
+            --blue: #0d47a1;
+            /* 濃い青（現在番号の箱） */
+            --blue-2: #2563eb;
+            /* アクセント青（枠など） */
+            --blue-soft: #eaf1ff;
+            /* 薄青（バッジ背景） */
+            --pink-soft: #fdeef1;
+            /* “まもなく”の薄ピンク */
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
-            font-size: 32px;
+            height: 100%;
         }
-    
-        .big {
-            font-size: 80px;
-            font-weight: bold;
+
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 20px 72px;
+            /* 下は更新バーの分を空ける */
         }
-    
+
+
+        /* 主要ブロックは前面に */
+        .wrap, #tsbar { position: relative; z-index: 1; }
+
+        /* 見出し等 */
+        h1 {
+            margin: 0 0 16px;
+            font-size: 26px;
+            color: var(--muted);
+            font-weight: 800;
+            letter-spacing: .02em;
+        }
+
+        .section-title {
+            margin: 22px 0 10px;
+            font-size: 22px;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: .02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 現在番号（大きい青い箱） */
+        .now-wrap {
+            display: grid;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .now-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            background: #0d47a1;
+            padding: 16px 24px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+            width: max-content;
+            min-width: 320px;
+        }
+
+        #now {
+            color: #fff;
+            font-weight: 900;
+            font-size: clamp(72px, 12vw, 160px);
+            letter-spacing: .03em;
+            line-height: 1;
+        }
+
+        .now-caption {
+            color: var(--muted);
+            font-size: 18px;
+            padding-left: 6px;
+        }
+
+        /* 番号グリッド（次/まだ） */
+        .num-grid {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+
+        .num-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--blue-soft);
+            font-weight: 800;
+            font-size: clamp(28px, 3.4vw, 44px);
+            letter-spacing: .02em;
+            padding: 12px 10px;
+            min-height: 84px;
+        }
+
+        /* “まもなく”は少し強調（青枠＋薄ピンク） */
+        .soon .num-item {
+            background: var(--pink-soft);
+            border: 2px solid var(--blue-2);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .1) inset;
+        }
+
+        /* 最終更新バー（固定） */
         #tsbar {
             position: fixed;
-            /* 画面に固定 */
             left: 0;
             right: 0;
             bottom: 0;
-            padding: 8px 12px;
+            padding: 10px 14px;
             text-align: center;
-            font-size: 18px;
-            color: #666;
-            background: rgba(255, 255, 255, 0.85);
+            font-size: 16px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, .94);
+            border-top: 1px solid var(--border);
+            backdrop-filter: blur(2px);
         }
     </style>
 </head>
 
 <body>
-    <h1>ただいまの診察番号</h1>
-    <div class="big" id="now">
-        {{ now_serving.seq_no or now_serving.id if now_serving else '-' }}
+    <div class="wrap">
+        <h1>ただいまの診察番号</h1>
+
+        <!-- 現在番号 -->
+        <section class="now-wrap">
+            <div class="now-box">
+                <div id="now">-</div>
+            </div>
+            <div class="now-caption" id="nowcap">—番の方まで診察済みです</div>
+        </section>
+
+        <!-- まもなくお呼び出しする方（先頭3件） -->
+        <h2 class="section-title">まもなくお呼び出しする方</h2>
+        <ul id="soon" class="num-grid soon"></ul>
+
+        <!-- まだお呼び出ししていない方（その後～最大12件） -->
+        <h2 class="section-title">まだお呼び出ししていない方</h2>
+        <ul id="queue" class="num-grid"></ul>
     </div>
 
-    <h2>つぎの方</h2>
-    <ul id="q">
-        {% for t in queue %}
-            <li>#{{ t.seq_no or t.id }}</li>
-        {% endfor %}
-    </ul>
-
     <div id="tsbar">最終更新 -</div>
-    
+
     <script>
+        function n(v) { return (v?.seq_no ?? v?.id); }
+
         async function refresh() {
             try {
                 const r = await fetch('/status.json', { cache: 'no-store' });
                 const data = await r.json();
 
-                // ただいまの診察番号
-                const now = document.getElementById('now');
-                now.textContent = data.now_serving
-                    ? (data.now_serving.seq_no ?? data.now_serving.id)
-                    : '-';
+                // 現在番号
+                const nowNo = data.now_serving ? n(data.now_serving) : null;
+                document.getElementById('now').textContent = nowNo ?? '-';
+                document.getElementById('nowcap').textContent =
+                    (nowNo ? `${nowNo}番の方まで診察済みです` : '—番の方まで診察済みです');
 
-                // 待ち行列（先頭から6件）
-                const ul = document.getElementById('q');
-                ul.innerHTML = '';
-                (data.queue || []).slice(0, 6).forEach(x => {
+                // 待ち行列: 先頭3 = まもなく / 以降12 = まだ
+                const q = data.queue || [];
+                const soon = q.slice(0, 3);
+                const rest = q.slice(3, 15);
+
+                const soonUl = document.getElementById('soon');
+                soonUl.innerHTML = '';
+                soon.forEach(x => {
                     const li = document.createElement('li');
-                    li.textContent = `#${x.seq_no ?? x.id}`;   // 後で seq_no が入ったら置換
-                    ul.appendChild(li);
+                    li.className = 'num-item';
+                    li.textContent = n(x) ? `#${n(x)}` : '-';
+                    soonUl.appendChild(li);
+                });
+
+                const listUl = document.getElementById('queue');
+                listUl.innerHTML = '';
+                rest.forEach(x => {
+                    const li = document.createElement('li');
+                    li.className = 'num-item';
+                    li.textContent = n(x) ? `#${n(x)}` : '-';
+                    listUl.appendChild(li);
                 });
 
                 document.getElementById('tsbar').textContent =
                     '最終更新 ' + new Date().toLocaleTimeString();
-
             } catch (e) {
-                // 通信エラー時も画面が真っ白にならないように
                 console.error('status refresh failed', e);
-                // 通信失敗時も時刻を出しておく
                 document.getElementById('tsbar').textContent =
                     '通信エラー ' + new Date().toLocaleTimeString();
             }
         }
-        setInterval(refresh, 5000); refresh();
+
+        setInterval(refresh, 5000);
+        refresh();
     </script>
 </body>
 
