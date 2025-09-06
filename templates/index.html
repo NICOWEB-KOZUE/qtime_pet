@@ -13,11 +13,13 @@
         :root {
             --bg: #f7f9fb;
             --card: #ffffff;
-            --accent: #2b7de9;
-            --accent-weak: #e6f0fe;
+            --accent: #2563eb;      /* アクセント青 */
+            --accent-weak: #eaf1ff; /* 薄い青 */
+            --accent-border: #c7d2fe;
+            --now-bg: #0d47a1;      /* 「ただいま」用の濃い青 */
             --text: #1f2937;
-            --muted: #6b7280;
             --ok: #15803d;
+            --border: #e5e7eb;
         }
 
         * {
@@ -34,14 +36,14 @@
 
         header {
             background: var(--card);
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         .wrap {
-            max-width: 920px;
+            max-width: 1180px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -49,30 +51,29 @@
         .brand{
             display:flex; align-items:center; gap:12px;
             font-weight:700;
-            font-size:20px;
+            font-size:32px;
             letter-spacing:.05em;
             /* 丸ゴ優先 → mac のヒラギノ丸ゴ → Windows 系 → 最後に一般ゴシック */
             font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN",
                          "Yu Gothic UI", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
-}
+        }
 
-        .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; }
         .logo-img {
-            height: 36px;
+            height: 40px;
             width: auto;
             border-radius: 8px;
             display: block;
         }
 
         .hero {
-            margin: 24px 0 10px;
+            margin: 24px 0 12px;
             display: grid;
             gap: 6px;
         }
 
         .hero h1 {
             margin: 0;
-            font-size: 28px;
+            font-size: 30px;
         }
 
         .hero p {
@@ -83,20 +84,20 @@
         .grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 18px;
         }
 
-        @media (min-width: 880px) {
+        @media (min-width: 980px) {
             .grid {
-                grid-template-columns: 1.1fr 1fr;
+                grid-template-columns: 1.2fr 1fr;
             }
         }
 
         .card {
             background: var(--card);
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 18px;
+            padding: 20px;
             box-shadow: 0 2px 8px rgba(16, 24, 40, .04);
         }
 
@@ -110,14 +111,14 @@
 
         .card .sub {
             color: var(--muted);
-            font-size: 20px;
+            font-size: 16px;
             margin-top: 4px;
         }
 
         .btns {
             display: grid;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 14px;
         }
 
         .btn {
@@ -145,81 +146,90 @@
 
         .btn-ghost {
             background: var(--accent-weak);
-            color: var(--accent);
+            color: var(--accent); border: 1px solid var(--accent-border);
         }
+
+        .hours{
+            margin-top: 14px;
+            padding: 12px 14px;
+            border: 1px solid var(--accent-border);
+            background: var(--accent-weak);
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .hours strong{ color: var(--text); }
+        .hours-sub{ color: var(--muted); }
 
         .status {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
             margin-top: 12px;
         }
 
         .pill {
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 14px;
+            padding: 16px;
             text-align: center;
             background: #fafafa;
         }
 
+        .pill .label {
+            color: var(--card);
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .pill--next .label { color: var(--accent); }
+
         .num {
-            font-size: 40px;
             font-weight: 800;
             letter-spacing: 1px;
         }
 
-        #now{
-            color:#ef4444; 
+         .pill--now {
+            background: var(--now-bg);
+            border-color: var(--now-bg);
+            color: #fff;
         }
 
-        .hint {
-            color: var(--muted);
-            font-size: 12px;
-            margin-top: 6px;
+        .pill--now .num { font-size: 64px; } /* 大きく強調 */
+
+         .pill--next {
+            background: var(--accent-weak);
+            border-color: var(--accent-border);
+            color: var(--accent);
         }
+        .pill--next .num { font-size: 64px; }
+
+        .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
 
         .queue {
-            margin-top: 8px;
+            margin-top: 10px;
             padding-left: 18px;
         }
-
-        .queue li {
-            margin: 2px 0;
-        }
+        .queue li { margin: 2px 0; }
 
         .toolbar {
             display: flex;
             gap: 8px;
             align-items: center;
             justify-content: space-between;
-            margin-top: 8px;
+            margin-top: 10px;
         }
-
         .refresh {
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border);
             background: #fff;
             border-radius: 10px;
             padding: 8px 12px;
             cursor: pointer;
         }
+        .ts { color: var(--muted); font-size: 12px; }
 
-        .ts {
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        .links {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .link {
-            font-size: 14px;
-            color: var(--accent);
-            text-decoration: none;
-        }
+        .links { display: flex; gap: 10px; margin-top: 10px; }
+        .link { font-size: 14px; color: var(--accent); text-decoration: none; }
     </style>
 </head>
 
@@ -247,18 +257,25 @@
                 <div class="btns">
                     <a class="btn btn-primary" href="{{ url_for('register_get') }}">📝 初回登録（はじめての方）</a>
                     <a class="btn btn-ghost" href="{{ url_for('login_get') }}">🔑 再診ログイン（診察券あり）</a>
+                </div>
+                <div class="hours">
+                    <div><strong>午前診療</strong> 9：00～12：00</div>
+                    <div class="hours-sub">WEB予約受付 7：00～11：00</div>
+                    <div style="margin-top:6px;"><strong>午後診療</strong> 15：00～19：00</div>
+                    <div class="hours-sub">WEB予約受付 13：00～18：00</div>
+                </div>
             </div>
 
             <!-- 状況カード -->
             <div class="card" id="status-card">
                 <h2>本日の診察状況</h2>
                 <div class="status">
-                    <div class="pill">
-                        <div class="sub">ただいまの番号</div>
+                    <div class="pill pill--now">
+                        <div class="label">ただいま診察中</div>
                         <div class="num" id="now">-</div>
                     </div>
-                    <div class="pill">
-                        <div class="sub">次の方</div>
+                    <div class="pill pill--next">
+                        <div class="label">次の方</div>
                         <div class="num" id="next">-</div>
                     </div>
                 </div>

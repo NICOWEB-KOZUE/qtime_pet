@@ -7,40 +7,31 @@
     <title>QTime PET | 院内表示</title>
     <style>
         :root {
-            --bg: #fff;
-            /* 背景は白 */
+            --bg: #fff;           /* 背景は白 */
             --text: #1f2937;
             --muted: #6b7280;
-            --blue: #0d47a1;
-            /* 濃い青（現在番号の箱） */
-            --blue-2: #2563eb;
-            /* アクセント青（枠など） */
-            --blue-soft: #eaf1ff;
-            /* 薄青（バッジ背景） */
-            --pink-soft: #fdeef1;
-            /* “まもなく”の薄ピンク */
+            --blue: #0d47a1;      /* 濃い青（現在番号の箱） */
+            --blue-2: #2563eb;    /* アクセント青（枠など） */
+            --blue-soft: #eaf1ff; /* 薄青（バッジ背景） */
+            --pink-soft: #fdeef1; /* “まもなく”の薄ピンク */
             --border: #e5e7eb;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        html,
-        body {
+        html,body {
             height: 100%;
         }
 
-        .wrap {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 28px 20px 72px;
-            /* 下は更新バーの分を空ける */
+        body{
+            margin:0; color:var(--text); background:#fff;
         }
 
-
-        /* 主要ブロックは前面に */
-        .wrap, #tsbar { position: relative; z-index: 1; }
+        .wrap{
+            max-width:1200px; margin:0 auto;
+            padding:28px 20px 96px;   /* ← 下は ticker 分だけ確保 */
+            position:relative; z-index:1;
+        }
 
         /* 見出し等 */
         h1 {
@@ -74,7 +65,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 20px;
-            background: #0d47a1;
+            background: #1e3a8a;
             padding: 16px 24px;
             box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
             width: max-content;
@@ -126,20 +117,31 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, .1) inset;
         }
 
-        /* 最終更新バー（固定） */
-        #tsbar {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            padding: 10px 14px;
-            text-align: center;
-            font-size: 16px;
-            color: var(--muted);
-            background: rgba(255, 255, 255, .94);
-            border-top: 1px solid var(--border);
-            backdrop-filter: blur(2px);
+        /* 横スクロールのお知らせバー（最下部） */
+        #tickerbar{ 
+            position:fixed; left:0; right:0; bottom:0; height:72px;
+            background:#fff; border-top:1px solid var(--border); 
+            overflow:hidden; z-index:1000; box-shadow: 0 -6px 16px rgba(0,0,0,.06);
         }
+        .ticker{ position:relative; width:100%; height:100%; }
+        .ticker__track{ 
+            position:absolute; top:0; left:0; height:72px;
+            display:flex; align-items:center;
+            white-space:nowrap;
+            will-change:transform;
+            animation:ticker-scroll 26s linear infinite;
+        }
+        .ticker__item{
+            display:inline-block; padding:0 3rem;
+            font-weight:900; letter-spacing:.02em;
+            font-size: clamp(22px, 2.6vw, 36px);
+            color:#1e3a8a;
+        }
+        @keyframes ticker-scroll{
+            0%   { transform:translateX(100%); }
+            100% { transform:translateX(-100%); }
+        }
+
     </style>
 </head>
 
@@ -164,7 +166,13 @@
         <ul id="queue" class="num-grid"></ul>
     </div>
 
-    <div id="tsbar">最終更新 -</div>
+    <div id="tickerbar" aria-label="本日のお知らせ">
+        <div class="ticker">
+            <div class="ticker__track">
+                <span class="ticker__item">お知らせ：9月24日（水）は休診となります</span>
+                </div>
+            </div>
+        </div>
 
     <script>
         function n(v) { return (v?.seq_no ?? v?.id); }
@@ -202,13 +210,8 @@
                     li.textContent = n(x) ? `#${n(x)}` : '-';
                     listUl.appendChild(li);
                 });
-
-                document.getElementById('tsbar').textContent =
-                    '最終更新 ' + new Date().toLocaleTimeString();
-            } catch (e) {
+             } catch (e) {
                 console.error('status refresh failed', e);
-                document.getElementById('tsbar').textContent =
-                    '通信エラー ' + new Date().toLocaleTimeString();
             }
         }
 

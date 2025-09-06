@@ -51,7 +51,7 @@
         .brand {
             display:flex; align-items:center; gap:12px;
             font-weight:700;
-            font-size:20px;
+            font-size:28px;
             letter-spacing:.05em;
             /* 丸ゴ優先 → mac のヒラギノ丸ゴ → Windows 系 → 最後に一般ゴシック */
             font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN",
@@ -241,7 +241,7 @@
                     <label for="email">メール（任意）</label>
                     <input id="email" name="email" type="email" value="{{ form.email if form else '' }}"
                         placeholder="例）hanako@example.com">
-                    <div class="hint">順番が近づいた通知をメールで受け取れます</div>
+                    <div class="hint">順番が近づいたらメールでお知らせします</div>
                 </div>
 
                 <div class="actions">
