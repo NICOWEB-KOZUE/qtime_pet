@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from models import db, Ticket, Patient
 from utils import find_or_create_today_ticket_for_patient, today_jst
+from utils import _next_seq_no_for_day
 from email.utils import parseaddr
 
 from notifier import send_email
@@ -139,24 +140,25 @@ def status_json():
     queue = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
-        .order_by(Ticket.created_at)
+        .order_by(Ticket.seq_no)
     )
-
-    # 今日の直近処理済み＝「ただいまの診察番号」（なければ None）
+    # 今日の直近処理済み＝「ただいまの診察番号」なければ　None)
     now_serving = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
-        .order_by(Ticket.created_at.desc())
+        .order_by(Ticket.seq_no.desc())
         .first()
     )
 
     return jsonify(
         {
-            "now_serving": {"id": now_serving.id} if now_serving else None,
-            "queue": [{"id": t.id} for t in queue]
+            "now_serving": (
+                {"id": now_serving.id, "seq_no": now_serving.seq_no}
+                if now_serving else None
+            ),
+            "queue": [{"id": t.id, "seq_no": t.seq_no} for t in queue]
         }
     )
-
 
 # --- 管理ログイン ---
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -191,23 +193,23 @@ def admin_dashboard():
     pending = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
-        .order_by(Ticket.created_at)
+        .order_by(Ticket.seq_no)
     )
     done_recent = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
-        .order_by(Ticket.created_at.desc())
+        .order_by(Ticket.seq_no.desc())
         .limit(5)
     )
     return render_template("admin.html", pending=pending, done_recent=done_recent)
 
-
+# 次を呼ぶ
 @app.route("/admin/next", methods=["POST"])
 def admin_next():
     t = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
-        .order_by(Ticket.created_at)
+        .order_by(Ticket.seq_no)
         .first()
     )
     if t:
@@ -217,13 +219,13 @@ def admin_next():
         notify_if_two_ahead()
     return redirect(url_for("admin_dashboard"))
 
-
+# 戻す（最後に呼んだ番号）
 @app.route("/admin/undo", methods=["POST"])
 def admin_undo():
     last = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
-        .order_by(Ticket.updated_at.desc() if hasattr(Ticket, "updated_at") else Ticket.created_at.desc())
+        .order_by(Ticket.seq_no.desc())
         .first()
     )
     if last:
@@ -236,36 +238,42 @@ def admin_undo():
 def admin_manual_add():
     name = request.form.get("name", "").strip()
     if name:
-        Ticket.create(name=name, visit_date=today_jst())  # patient=None でOK
+        vdate = today_jst()
+        seq = _next_seq_no_for_day(vdate)
+        Ticket.create(
+            name=name,
+            visit_date=vdate,
+            seq_no=seq
+        )
     return redirect(url_for("admin_dashboard"))
-
 
 @app.route("/display")
 def display():
-    now_serving = (Ticket.select()
-                   .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
-                   .order_by(Ticket.created_at.desc())
-                   .first())
-    queue = (Ticket.select()
-             .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
-             .order_by(Ticket.created_at)
-             .limit(6))
+    now_serving = (
+        Ticket.select()
+        .where((Ticket.visit_date == today_jst()) & (Ticket.done == True))
+        .order_by(Ticket.seq_no.desc())
+        .first()
+    )
+    queue = (
+        Ticket.select()
+        .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
+        .order_by(Ticket.seq_no)
+        .limit(6)
+    )
     return render_template("display.html", now_serving=now_serving, queue=queue)
 
 # 「あと2人で通知」
 def notify_if_two_ahead():
-    print(f"[NOTIFY CHECK] NOTIFY_ENABLED={NOTIFY_ENABLED}")
     if not NOTIFY_ENABLED:
-        print("[NOTIFY SKIP] 通知が無効です")
         return
 
     queue = (
         Ticket.select()
         .where((Ticket.visit_date == today_jst()) & (Ticket.done == False))
-        .order_by(Ticket.created_at)
+        .order_by(Ticket.seq_no)
     )
 
-    print(f"[NOTIFY CHECK] 待ち人数: {queue.count()}")
     # 0=診察直前, 1=あと1人, 2=あと2人
     target = queue.offset(2).first()  # 先頭の“次の次”＝あと2人
     if not target:

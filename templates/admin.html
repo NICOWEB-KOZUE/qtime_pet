@@ -6,7 +6,7 @@
     <title>QTime PET</title>
 </head>
 
-<body>
+
     <body>
         <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
             <h1 style="margin:0;font-size:18px;">QTime PET 管理</h1>
@@ -19,18 +19,18 @@
         <form method="post" action="{{ url_for('admin_next') }}"><button>次を呼ぶ</button></form>
         <ul>
             {% for t in pending %}
-            <li>#{{t.id}} {{t.name}} {% if t.notified %}<span style="color:green;">✅ 通知済み</span>{% endif %}</li>
+                <li>No.{{ t.seq_no }} {{ t.name }}</li>
             {% else %}
-            <li>なし</li>
+                <li>なし</li>
             {% endfor %}
         </ul>
     
         <h2>直近処理済み</h2>
         <ul>
             {% for t in done_recent %}
-            <li>#{{t.id}} {{t.name}}</li>
+                <li>No.{{ t.seq_no }} {{ t.name }}</li>
             {% else %}
-            <li>なし</li>
+                <li>なし</li>
             {% endfor %}
         </ul>
     

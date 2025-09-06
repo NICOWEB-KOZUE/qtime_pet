@@ -45,6 +45,7 @@ class Ticket(Model):
     visit_date = DateField(null=True)  # 当日の運用を明確化
     notified = BooleanField(default=False)  # 通知済フラグ
     session = CharField(default="AM")  # "AM" or "PM"
+    seq_no = IntegerField(null=True, index=True)  #  当日連番
 
     class Meta:
         database = db

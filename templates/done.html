@@ -8,8 +8,7 @@
 
 <body>
     <h1>受付完了！</h1>
-    <p>{{ ticket.name }} さん、あなたの番号は <strong>{{ ticket.id }}</strong> 番です。</p>
-    <a href="/status">診察状況を見る</a>
+    <p>{{ ticket.name }} さん、あなたの番号は <strong>{{ ticket.seq_no or ticket.id }}</strong> 番です。</p>
 </body>
 
 </html>

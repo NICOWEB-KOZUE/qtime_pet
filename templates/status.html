@@ -8,29 +8,49 @@
 
 <body>
     <h1>診察状況</h1>
-    <ul>
-        {% for t in tickets %}
-        <li>{{ t.id }}番: {{ t.name }}</li>
+    <h2>ただいまの診察番号</h2>
+    <div class="big" id="now">
+        {{ now_serving.seq_no or now_serving.id if now_serving else '-' }}
+    </div>
+    <h2>つぎの方</h2>
+    <ul id="q">
+        {% for t in queue %}
+            <li>#{{ t.seq_no or t.id }}</li>
         {% endfor %}
-    </ul>
-    <a href="/admin/next">次を呼ぶ（スタッフ用）</a>
+        </ul>
+    <div id="tsbar">最終更新 -</div>
 
-    <ul id="queue"></ul>
     <script>
         async function refresh() {
-            const r = await fetch('/status.json', { cache: 'no-store' });
-            const data = await r.json();
-            const ul = document.getElementById('queue');
-            if (!ul) return;
-            ul.innerHTML = '';
-            data.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item.name;
-                ul.appendChild(li);
-            });
+            try {
+                const r = await fetch('/status.json', { cache: 'no-store' });
+                const data = await r.json();
+
+                // ただいまの診察番号
+                const now = document.getElementById('now');
+                now.textContent = data.now_serving ? (data.now_serving.seq_no ?? data.now_serving.id) : '-';
+
+                // 待ち行列（先頭から6件）
+                const ul = document.getElementById('q');
+                ul.innerHTML = '';
+                (data.queue || []).slice(0, 6).forEach(x => {
+                    const li = document.createElement('li');
+                    li.textContent = `#${x.seq_no ?? x.id}`;
+                    ul.appendChild(li);
+                });
+
+                document.getElementById('tsbar').textContent =
+                    '最終更新 ' + new Date().toLocaleTimeString();
+
+            } catch (e) {
+                // 通信エラー時も画面が真っ白にならないように
+                console.error('status refresh failed', e);
+                // 通信失敗時も時刻を出しておく
+                document.getElementById('ts').textContent =
+                    '通信エラー ' + new Date().toLocaleTimeString();
+            }
         }
-        setInterval(refresh, 5000);
-        refresh();
+        setInterval(refresh, 5000); refresh();
     </script>
 </body>
 
