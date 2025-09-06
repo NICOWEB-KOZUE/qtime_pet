@@ -2,23 +2,255 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <title>初回登録</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 丸みのある日本語フォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&display=swap" rel="stylesheet">
+    <title>平泉どうぶつ病院 | 初回登録</title>
+
+    <style>
+        :root {
+            --bg: #f7f9fb;
+            --card: #ffffff;
+            --accent: #2b7de9;
+            --accent-weak: #e6f0fe;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --danger: #ef4444;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            background: var(--bg);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .brand {
+            display:flex; align-items:center; gap:12px;
+            font-weight:700;
+            font-size:20px;
+            letter-spacing:.05em;
+            /* 丸ゴ優先 → mac のヒラギノ丸ゴ → Windows 系 → 最後に一般ゴシック */
+            font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN",
+                         "Yu Gothic UI", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+}
+
+        .logo-img {
+            height: 36px;
+            width: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        main.wrap {
+            padding-top: 10px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(16, 24, 40, .04);
+        }
+
+        .card h1 {
+            margin: 0 0 8px;
+            font-size: 22px;
+        }
+
+        .card p.lead {
+            margin: 0 0 16px;
+            color: var(--muted);
+        }
+
+        form {
+            display: grid;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+        }
+
+        label {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .req {
+            color: var(--danger);
+            margin-left: 6px;
+            font-weight: 700;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            font-size: 16px;
+            transition: box-shadow .15s ease, border-color .15s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-weak);
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .btn {
+            appearance: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform .02s ease, box-shadow .2s ease, background-color .2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-ghost {
+            background: var(--accent-weak);
+            color: var(--accent);
+        }
+
+        .error {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .back {
+            margin-top: 12px;
+            display: inline-block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>初回登録</h1>
-    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
-    <form method="post">
-        <div>氏名*：<input name="name" value="{{ form.name if form else '' }}" required></div>
-        <div>フリガナ：<input name="kana" value="{{ form.kana if form else '' }}"></div>
-        <div>ペット名*：<input name="pet_name" value="{{ form.pet_name if form else '' }}" required></div>
-        <div>電話番号*：<input name="phone" value="{{ form.phone if form else '' }}" required></div>
-        <div>生年月日*：<input type="date" name="birth" value="{{ form.birth if form else '' }}" required></div>
-        <div>メール（任意）：<input type="email" name="email" value="{{ form.email if form else '' }}"></div>
-        <button>登録して順番を取る</button>
-    </form>
-    <p><a href="/">戻る</a></p>
+    <header>
+        <div class="wrap">
+            <div class="brand">
+                <img class="logo-img" src="{{ url_for('static', filename='img/qtime_pet.png') }}" alt="平泉どうぶつ病院 ロゴ" />
+                <div>平泉どうぶつ病院</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="card">
+            <h1>初回登録</h1>
+            <p class="lead">必要事項をご入力のうえ、「登録して順番を取る」を押してください。</p>
+
+            {% if error %}
+            <div class="error" role="alert">{{ error }}</div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                <div class="field">
+                    <label for="name">氏名<span class="req">*</span></label>
+                    <input id="name" name="name" type="text" value="{{ form.name if form else '' }}" required
+                        placeholder="例）平泉 花子">
+                </div>
+
+                <div class="field">
+                    <label for="kana">フリガナ</label>
+                    <input id="kana" name="kana" type="text" value="{{ form.kana if form else '' }}"
+                        placeholder="例）ヒライズミ ハナコ">
+                </div>
+
+                <div class="field">
+                    <label for="pet_name">ペット名<span class="req">*</span></label>
+                    <input id="pet_name" name="pet_name" type="text" value="{{ form.pet_name if form else '' }}"
+                        required placeholder="例）ポチ">
+                </div>
+
+                <div class="field">
+                    <label for="phone">電話番号<span class="req">*</span></label>
+                    <input id="phone" name="phone" type="tel" inputmode="tel" pattern="[0-9\-]+"
+                        value="{{ form.phone if form else '' }}" required placeholder="例）019-000-0000">
+                    <div class="hint">半角数字とハイフン可</div>
+                </div>
+
+                <div class="field">
+                    <label for="birth">生年月日<span class="req">*</span></label>
+                    <input id="birth" name="birth" type="date" value="{{ form.birth if form else '' }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="email">メール（任意）</label>
+                    <input id="email" name="email" type="email" value="{{ form.email if form else '' }}"
+                        placeholder="例）hanako@example.com">
+                    <div class="hint">順番が近づいた通知をメールで受け取れます</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" type="submit">登録して順番を取る</button>
+                    <a class="btn btn-ghost" href="{{ url_for('index') }}">戻る</a>
+                </div>
+            </form>
+        </div>
+    </main>
 </body>
 
 </html>

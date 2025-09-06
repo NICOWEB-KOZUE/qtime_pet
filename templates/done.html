@@ -2,13 +2,234 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <title>受付完了</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>受付完了 | 平泉どうぶつ病院</title>
+
+    <!-- やわらかい見出しフォント（病院名用） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f7f9fb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --accent: #2b7de9;
+            --ok: #16a34a;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+                "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .wrap {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: .03em;
+            font-size: 28px;
+            font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN",
+                "Yu Gothic UI", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+        }
+
+        .brand img {
+            height: 36px;
+            width: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            margin-top: 18px;
+            box-shadow: 0 4px 18px rgba(16, 24, 40, .06);
+        }
+
+        .hero {
+            display: grid;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero .ok {
+            display: inline-grid;
+            place-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--ok);
+            color: #fff;
+            font-weight: 800;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .ticket {
+            display: grid;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .num-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            background: var(--accent);
+            color: #fff;
+            padding: 18px 20px;
+            box-shadow: 0 8px 22px rgba(43, 125, 233, .25);
+        }
+
+        .num {
+            font-weight: 900;
+            font-size: clamp(52px, 10vw, 120px);
+            letter-spacing: .04em;
+            line-height: 1;
+        }
+
+        .meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .meta span {
+            background: #f3f4f6;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px 10px;
+        }
+
+        .actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width:560px) {
+            .actions {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .btn {
+            appearance: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #111827;
+            color: #fff;
+        }
+
+        .btn-ghost {
+            background: #eef2ff;
+            color: #3730a3;
+        }
+
+        .notice {
+            margin-top: 4px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+    </style>
 </head>
 
 <body>
-    <h1>受付完了！</h1>
-    <p>{{ ticket.name }} さん、あなたの番号は <strong>{{ ticket.seq_no or ticket.id }}</strong> 番です。</p>
+    <header>
+        <div class="wrap">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='img/qtime_pet.png') }}" alt="平泉どうぶつ病院 ロゴ">
+                平泉どうぶつ病院
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="card">
+            <div class="hero">
+                <h1><span class="ok">✓</span> 受付が完了しました</h1>
+                <p>
+                    {% if ticket.name %}{{ ticket.name }} 様、{% endif %}
+                    あなたの受付番号は下記のとおりです。
+                </p>
+            </div>
+
+            <section class="ticket">
+                <div class="num-box">
+                    <div class="num">No. {{ ticket.seq_no or ticket.id }}</div>
+                </div>
+                <div class="meta">
+                    {% if ticket.session %}<span>{{ ticket.session }} 受付</span>{% endif %}
+                    {% if ticket.visit_date %}<span>日付：{{ ticket.visit_date }}</span>{% endif %}
+                    {% if ticket.created_at %}<span>受付時刻：{{ ticket.created_at.strftime('%H:%M') }}</span>{% endif %}
+                </div>
+
+                <div class="actions">
+                    <a class="btn btn-primary" href="{{ url_for('status') }}">診察状況を確認する</a>
+                    <a class="btn btn-ghost" href="{{ url_for('index') }}">トップに戻る</a>
+                </div>
+
+                <p class="notice">
+                    ※ メールアドレスをご登録の方は、順番が近づくとお知らせが届きます。<br>
+                    ※ 画面は自動更新されません。「診察状況を確認する」から最新の順番をご確認ください。
+                </p>
+            </section>
+        </div>
+    </main>
 </body>
 
 </html>
