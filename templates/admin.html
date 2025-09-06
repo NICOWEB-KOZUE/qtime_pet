@@ -14,6 +14,7 @@
             --muted: #6b7280;
             --accent: #2563eb;
             --danger: #b91c1c;
+            --ok: #16a34a;
         }
 
         * {
@@ -179,6 +180,12 @@
             border: 1px solid #c7d2fe;
         }
 
+        .badge-ok {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 999px; font-size: 12px;
+            border: 1px solid #bbf7d0; background: #ecfdf5; color: var(--ok);
+        }
+
         .name {
             overflow: hidden;
             text-overflow: ellipsis;
@@ -189,6 +196,10 @@
         .dim {
             color: var(--muted);
             font-size: 12px;
+        }
+
+         .right {
+            display: flex; align-items: center; gap: 8px;
         }
 
         .grid-2 {
@@ -245,6 +256,7 @@
                 <div class="links">
                     <a class="link" href="{{ url_for('status') }}" target="_blank">診察状況（患者向け）</a>
                     <a class="link" href="{{ url_for('display') }}" target="_blank">院内ディスプレイ</a>
+                    <span class="badge-ok" title="メール通知済みの印">✅ 通知済み</span>
                 </div>
                 <form method="post" action="{{ url_for('admin_logout') }}">
                     <button type="submit" class="btn">ログアウト</button>
@@ -292,7 +304,12 @@
                                     <span class="badge">No.{{ t.seq_no or t.id }}</span>
                                     <span class="name">{{ t.name }}</span>
                                 </div>
-                                <span class="dim">{{ t.created_at.strftime('%H:%M') if t.created_at else '' }}</span>
+                                <div class="right">
+                                    {% if t.notified %}
+                                        <span class="badge-ok" title="メール通知済み">✅</span>
+                                    {% endif %}
+                                    <span class="dim">{{ t.created_at.strftime('%H:%M') if t.created_at else '' }}</span>
+                                </div>
                             </li>
                             {% else %}
                             <li class="item"><span class="dim">なし</span></li>
@@ -309,10 +326,15 @@
                                     <span class="badge">No.{{ t.seq_no or t.id }}</span>
                                     <span class="name">{{ t.name }}</span>
                                 </div>
-                                <span class="dim">{{ t.created_at.strftime('%H:%M') if t.created_at else '' }}</span>
+                                <div class="right">
+                                    {% if t.notified %}
+                                        <span class="badge-ok" title="メール通知済み">✅</span>
+                                    {% endif %}
+                                    <span class="dim">{{ t.created_at.strftime('%H:%M') if t.created_at else '' }}</span>
+                                </div>
                             </li>
                             {% else %}
-                            <li class="item"><span class="dim">なし</span></li>
+                                <li class="item"><span class="dim">なし</span></li>
                             {% endfor %}
                         </ul>
 
