@@ -4,9 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>QTime PET</title>
-</head>
-
-<body>
     <style>
         body {
             font-size: 32px;
@@ -16,22 +13,35 @@
             font-size: 80px;
             font-weight: bold;
         }
-
-        #tsbar{
-            position: fixed;  /* 画面に固定 */
-            left: 0; right: 0; bottom: 0;
+    
+        #tsbar {
+            position: fixed;
+            /* 画面に固定 */
+            left: 0;
+            right: 0;
+            bottom: 0;
             padding: 8px 12px;
             text-align: center;
-            font-size: 18px; color: #666;
-            background: rgba(255,255,255,0.85);
-          }
+            font-size: 18px;
+            color: #666;
+            background: rgba(255, 255, 255, 0.85);
+        }
     </style>
+</head>
 
+<body>
     <h1>ただいまの診察番号</h1>
-    <div class="big" id="now">-</div>
-    
+    <div class="big" id="now">
+        {{ now_serving.seq_no or now_serving.id if now_serving else '-' }}
+    </div>
+
     <h2>つぎの方</h2>
-    <ul id="q"></ul>
+    <ul id="q">
+        {% for t in queue %}
+            <li>#{{ t.seq_no or t.id }}</li>
+        {% endfor %}
+    </ul>
+
     <div id="tsbar">最終更新 -</div>
     
     <script>
@@ -42,14 +52,16 @@
 
                 // ただいまの診察番号
                 const now = document.getElementById('now');
-                now.textContent = data.now_serving ? data.now_serving.id : '-';
+                now.textContent = data.now_serving
+                    ? (data.now_serving.seq_no ?? data.now_serving.id)
+                    : '-';
 
                 // 待ち行列（先頭から6件）
                 const ul = document.getElementById('q');
                 ul.innerHTML = '';
                 (data.queue || []).slice(0, 6).forEach(x => {
                     const li = document.createElement('li');
-                    li.textContent = `#${x.id}`;   // 後で seq_no が入ったら置換
+                    li.textContent = `#${x.seq_no ?? x.id}`;   // 後で seq_no が入ったら置換
                     ul.appendChild(li);
                 });
 
@@ -60,7 +72,7 @@
                 // 通信エラー時も画面が真っ白にならないように
                 console.error('status refresh failed', e);
                 // 通信失敗時も時刻を出しておく
-                document.getElementById('ts').textContent =
+                document.getElementById('tsbar').textContent =
                     '通信エラー ' + new Date().toLocaleTimeString();
             }
         }
